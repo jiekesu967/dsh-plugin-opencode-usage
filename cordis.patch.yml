@@ -1,0 +1,7 @@
+# dsh-plugin-opencode-usage bundle patch:把插件挂进 profile 的 host 组合。
+# Host 半解析 credentials(OPENCODE_GO_API_KEY),查询
+# https://opencode.ai/zen/go/v1/usage,并把百分比换算为套餐总额/已用/剩余;
+# 提供 /plugins/opencode-usage/stats 路由供浏览器面板读取。
+- insert:
+    - id: opencode-usage
+      name: dsh-plugin-opencode-usage
