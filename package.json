@@ -1,7 +1,7 @@
 {
   "name": "dsh-plugin-opencode-usage",
   "version": "0.1.0",
-  "description": "OpenCode Go 订阅用量悬浮面板:在 DSH Web 左侧侧边栏设置按钮上方显示订阅总额度、滚动/每周/每月已用与剩余额度。",
+  "description": "OpenCode Go 订阅用量悬浮面板:在 DeepSeek Harness Web 会话输入栏左下角显示滚动/每周/每月额度、已用与剩余额度。",
   "type": "module",
   "main": "lib/index.js",
   "exports": {
@@ -20,7 +20,7 @@
       "inject": [
         "@deepseek-ai/dsh-client-runtime",
         "@deepseek-ai/dsh-client-locale",
-        "@deepseek-ai/dsh-client-ui-sidebar"
+        "@deepseek-ai/dsh-client-ui-conversation"
       ],
       "platform": "web"
     }
