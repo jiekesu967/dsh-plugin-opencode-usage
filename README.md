@@ -15,7 +15,7 @@
 | --- | --- | --- |
 | 滚动用量 | `usage.rolling` | $12（5 小时滚动） |
 | 每周用量 | `usage.weekly` | $30 |
-| 每月用量 | `usage.monthly` | $60 |
+| 每月用量 | `usage.monthly` | $15（DeepSeek V4 Pro / V4 Flash） |
 
 - 每张卡片显示：**剩余额度 / 已用额度 / 总额度 / 使用百分比 / 重置时间**
 - 面板以入口按钮为锚点：左边缘对齐按钮，底部在按钮上方 12px，随会话窗口/侧边栏变化自动调整
@@ -141,7 +141,7 @@ OPENCODE_GO_API_KEY: sk-...
 ## 已知限制
 
 - 官方 usage 接口只返回百分比，不返回绝对金额；绝对额度由 `limits` 配置计算
-- 如果 OpenCode 调整 Go 套餐额度，需要同步更新 `limits` 配置
+- OpenCode Go 整体套餐上限仍是每月 $60，但 v4p/v4f 月度包含用量已调为 $15；若官方再次调整，需要同步更新 `limits` 配置
 - 仅适用于 `web` profile；`headless` 下不注册路由
 
 ## License
