@@ -15,7 +15,7 @@
 | --- | --- | --- |
 | 滚动用量 | `usage.rolling` | $12（5 小时滚动） |
 | 每周用量 | `usage.weekly` | $30 |
-| 每月用量 | `usage.monthly` | $15（DeepSeek V4 Pro / V4 Flash） |
+| 每月用量 | `usage.monthly` | $30（默认 V4 Flash 口径；V4 Pro 为 $15） |
 
 - 每张卡片显示：**剩余额度 / 已用额度 / 总额度 / 使用百分比 / 重置时间**
 - 面板以入口按钮为锚点：左边缘对齐按钮，底部在按钮上方 12px，随会话窗口/侧边栏变化自动调整
@@ -85,11 +85,12 @@ dsh-plugin-opencode-usage/
 | 滚动（5 小时） | $12 | `rolling: 12` | 未变 |
 | 每周 | $30 | `weekly: 30` | 未变 |
 | 每月（整体） | $60 | — | 未变 |
-| 每月（v4p/v4f 模型包含用量） | $15 | `monthly: 15` | 已改为 $15 |
+| 每月（V4 Pro 模型包含用量） | $15 | — | 未变 |
+| 每月（V4 Flash 模型包含用量） | $30 | `monthly: 30` | 已改为 $30 |
 
-交叉验证：官方 usage API 当前约 `rolling 18% / weekly 7% / monthly 11%`，
-按 `12 / 30 / 15` 换算后与本地 DSH 会话日志估算的 OpenCode Go 实际消费
-基本一致；若把 monthly 按 $60 换算会明显偏大。
+交叉验证：官方 usage API 当前约 `rolling 10% / weekly 12% / monthly 13%`；
+官方窗口额度 rolling $12 / weekly $30 未变。模型月度包含用量方面,
+V4 Pro 保持 $15,V4 Flash 已从 $15 调整到 $30。
 
 ## 安装
 
@@ -156,7 +157,7 @@ OPENCODE_GO_API_KEY: sk-...
 ## 已知限制
 
 - 官方 usage 接口只返回百分比，不返回绝对金额；绝对额度由 `limits` 配置计算
-- OpenCode Go 整体套餐上限仍是每月 $60，但 v4p/v4f 月度包含用量已调为 $15；若官方再次调整，需要同步更新 `limits` 配置
+- OpenCode Go 整体套餐上限仍是每月 $60；模型月度包含用量当前为 V4 Pro $15、V4 Flash $30。插件默认采用 V4 Flash 口径，V4 Pro 用户请在 `limits.monthly` 覆盖为 15
 - 仅适用于 `web` profile；`headless` 下不注册路由
 
 ## License
