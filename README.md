@@ -160,6 +160,11 @@ OPENCODE_GO_API_KEY: sk-...
 - OpenCode Go 整体套餐上限仍是每月 $60；模型月度包含用量当前为 V4 Pro $15、V4 Flash $30。插件默认采用 V4 Flash 口径，V4 Pro 用户请在 `limits.monthly` 覆盖为 15
 - 仅适用于 `web` profile；`headless` 下不注册路由
 
+## 致谢 / Credits
+
+- [DeepSeek Harness](https://github.com/deepseek-harness) — 本插件运行所基于的 Harness 框架
+- [jiekesu967](https://github.com/jiekesu967) — 插件开发者
+
 ## License
 
 MIT
