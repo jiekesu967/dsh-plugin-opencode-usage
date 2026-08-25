@@ -9,15 +9,9 @@
 ## 功能
 
 - 在会话窗口左下角注册独立悬浮入口，不占用侧边栏入口，也不放入输入框，避免与其他插件冲突
-- 点击弹出悬浮面板，展示 OpenCode Go 订阅的三类额度：
-
-| 窗口 | 官方接口字段 | 默认总额度 |
-| --- | --- | --- |
-| 滚动用量 | `usage.rolling` | $12（5 小时滚动） |
-| 每周用量 | `usage.weekly` | $30 |
-| 每月用量 | `usage.monthly` | $30（默认 V4 Flash 口径；V4 Pro 为 $15） |
-
-- 每张卡片显示：**剩余额度 / 已用额度 / 总额度 / 使用百分比 / 重置时间**
+- 点击弹出悬浮面板，展示 OpenCode Go 订阅的三个窗口：滚动用量、每周用量、每月用量
+- 每张卡片显示：**已用百分比 / 剩余百分比 / 重置时间**
+- 不展示具体美元金额，避免不同模型额度金额不同造成误导
 - 面板以入口按钮为锚点：左边缘对齐按钮，底部在按钮上方 12px，随会话窗口/侧边栏变化自动调整
 - 打开期间每 60s 自动刷新；支持 `Esc` 与点击面板外部关闭
 - API key 只在 Harness host 进程内解析，不会下发浏览器
@@ -39,7 +33,7 @@ DSH Host 插件
    │  2. ctx.credentials.resolve("OPENCODE_GO_API_KEY")
    │  3. GET https://opencode.ai/zen/go/v1/usage
    │     Authorization: Bearer <api-key>
-   │  4. percent × limit → used / remaining
+   │  4. 透出 percent / remainingPercent / resetsAt
    ▼
 返回 JSON，由 React 面板渲染
 ```
@@ -56,12 +50,7 @@ DSH Host 插件
 }
 ```
 
-插件按 OpenCode Go 官方套餐额度（<https://opencode.ai/docs/go/#usage-limits>）换算：
-
-```text
-used      = limit × percent / 100
-remaining = limit - used
-```
+插件直接展示官方 API 返回的百分比，不做金额换算。
 
 ## 目录结构
 
@@ -76,21 +65,18 @@ dsh-plugin-opencode-usage/
 └── README.md
 ```
 
-## 额度口径
+## 额度口径（背景说明，不用于显示）
 
-以 2026-08-17 官方文档与 usage API 为准：
+不同模型的额度金额不同（例如 V4 Pro 月度 $15、V4 Flash 月度 $30，
+整体月上限 $60），因此插件只展示官方 API 返回的百分比，不做金额换算。
 
-| 窗口 | 官方套餐窗口额度 | 插件默认 | 是否修改 |
-| --- | --- | --- | --- |
-| 滚动（5 小时） | $12 | `rolling: 12` | 未变 |
-| 每周 | $30 | `weekly: 30` | 未变 |
-| 每月（整体） | $60 | — | 未变 |
-| 每月（V4 Pro 模型包含用量） | $15 | — | 未变 |
-| 每月（V4 Flash 模型包含用量） | $30 | `monthly: 30` | 已改为 $30 |
+| 窗口 | 官方接口字段 | 说明 |
+| --- | --- | --- |
+| 滚动用量 | `usage.rolling` | 5 小时滚动窗口百分比 |
+| 每周用量 | `usage.weekly` | 每周窗口百分比 |
+| 每月用量 | `usage.monthly` | 月度窗口百分比 |
 
-交叉验证：官方 usage API 当前约 `rolling 10% / weekly 12% / monthly 13%`；
-官方窗口额度 rolling $12 / weekly $30 未变。模型月度包含用量方面,
-V4 Pro 保持 $15,V4 Flash 已从 $15 调整到 $30。
+官方 API 只返回 `percent` 与 `resetsAt`；插件同时给出 `remainingPercent = 100 - percent`。
 
 ## 安装
 
@@ -122,17 +108,8 @@ dsh plugin --profile web add github:jiekesu967/dsh-plugin-opencode-usage
     # OpenCode Go 订阅接口
     apiBaseUrl: https://opencode.ai/zen/go/v1
 
-    # 货币符号
-    currency: "$"
-
     # host 成功结果缓存时间
     cacheMs: 30000
-
-    # 官方调整套餐额度时，改这里即可，无需改代码
-    limits:
-      rolling: 12
-      weekly: 30
-      monthly: 60
 ```
 
 ### 凭据
@@ -156,8 +133,8 @@ OPENCODE_GO_API_KEY: sk-...
 
 ## 已知限制
 
-- 官方 usage 接口只返回百分比，不返回绝对金额；绝对额度由 `limits` 配置计算
-- OpenCode Go 整体套餐上限仍是每月 $60；模型月度包含用量当前为 V4 Pro $15、V4 Flash $30。插件默认采用 V4 Flash 口径，V4 Pro 用户请在 `limits.monthly` 覆盖为 15
+- 官方 usage 接口只返回百分比，不返回绝对金额；插件也只展示百分比
+- 不同模型额度金额不同，因此不提供金额换算，避免误导
 - 仅适用于 `web` profile；`headless` 下不注册路由
 
 ## 致谢 / Credits
