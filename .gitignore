@@ -1,3 +1,7 @@
 node_modules/
 *.log
 .DS_Store
+
+# Packing output and the cache the release tooling points npm at.
+*.tgz
+.npm-cache/

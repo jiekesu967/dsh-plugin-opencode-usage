@@ -80,15 +80,22 @@ dsh-plugin-opencode-usage/
 
 ## 安装
 
+从 npm 安装（推荐）：
+
 ```sh
-cd /path/to/your/workspace
-dsh plugin --profile web add ./dsh-plugin-opencode-usage
+dsh plugin --profile web add dsh-plugin-opencode-usage
 ```
 
-也可以安装已发布的 GitHub 仓库（`prepare` 无构建步骤，可直接引用）：
+也可以从 GitHub 仓库安装（无构建步骤，`lib/` 即源码，可直接引用）：
 
 ```sh
 dsh plugin --profile web add github:jiekesu967/dsh-plugin-opencode-usage
+```
+
+或者从本地目录安装：
+
+```sh
+dsh plugin --profile web add ./dsh-plugin-opencode-usage
 ```
 
 安装后 `dsh plugin` 会自动写入 web profile 的 `dependencies`，并把
@@ -136,6 +143,11 @@ OPENCODE_GO_API_KEY: sk-...
 - 官方 usage 接口只返回百分比，不返回绝对金额；插件也只展示百分比
 - 不同模型额度金额不同，因此不提供金额换算，避免误导
 - 仅适用于 `web` profile；`headless` 下不注册路由
+- `GET /plugins/opencode-usage/stats` **不做鉴权**，它继承 webserver 的绑定地址。
+  默认 profile 绑定 `127.0.0.1`，只有本机可访问；若你把 profile 的
+  `webServer.config.host` 改成 `0.0.0.0`，同一局域网内的任何人都能读到用量百分比。
+  API key 本身不会离开 host 进程（只作为请求头上游使用），所以泄露的是用量信息而非凭据。
+  介意的话请保持回环绑定，或在反向代理层限制该路径。
 
 ## 致谢 / Credits
 
