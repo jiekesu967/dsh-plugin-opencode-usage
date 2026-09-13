@@ -1,6 +1,6 @@
 {
   "name": "dsh-plugin-opencode-usage",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "OpenCode Go 用量百分比悬浮面板:在 DeepSeek Harness Web 会话窗口左下角显示滚动/每周/每月用量百分比与重置时间。",
   "type": "module",
   "main": "lib/index.js",
@@ -22,7 +22,8 @@
     "web-ui"
   ],
   "engines": {
-    "node": ">=18"
+    "node": "^22.19.0 || >=24.0.0",
+    "dsh": ">=0.1.5-rc.1 <0.2.0-0"
   },
   "repository": {
     "type": "git",
@@ -50,6 +51,13 @@
       ],
       "platform": "web"
     }
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "^4.0.2",
+    "@deepseek-ai/dsh-client-locale": ">=0.1.5-rc.1 <0.2.0-0",
+    "@deepseek-ai/dsh-client-ui-renderer": ">=0.1.5-rc.1 <0.2.0-0",
+    "@deepseek-ai/dsh-credentials": ">=0.1.5-rc.1 <0.2.0-0",
+    "@deepseek-ai/dsh-host-webserver": ">=0.1.5-rc.1 <0.2.0-0"
   },
   "devDependencies": {
     "@types/react": "~18.3.1",
