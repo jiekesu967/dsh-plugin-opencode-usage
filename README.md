@@ -80,7 +80,16 @@ dsh-plugin-opencode-usage/
 
 ## 安装
 
-从 npm 安装（推荐）：
+DSH 桌面应用用的是 **`desktop` profile**，命令行 `dsh web` 用的是 `web` profile，
+先确认要装进哪一个。
+
+桌面端（DeepSeek Harness 桌面应用）：
+
+```sh
+dsh plugin --profile desktop add dsh-plugin-opencode-usage
+```
+
+命令行 Web（`dsh web`）：
 
 ```sh
 dsh plugin --profile web add dsh-plugin-opencode-usage
@@ -89,18 +98,19 @@ dsh plugin --profile web add dsh-plugin-opencode-usage
 也可以从 GitHub 仓库安装（无构建步骤，`lib/` 即源码，可直接引用）：
 
 ```sh
-dsh plugin --profile web add github:jiekesu967/dsh-plugin-opencode-usage
+dsh plugin --profile desktop add github:jiekesu967/dsh-plugin-opencode-usage
 ```
 
 或者从本地目录安装：
 
 ```sh
-dsh plugin --profile web add ./dsh-plugin-opencode-usage
+dsh plugin --profile desktop add ./dsh-plugin-opencode-usage
 ```
 
-安装后 `dsh plugin` 会自动写入 web profile 的 `dependencies`，并把
-`dsh-plugin-opencode-usage` 追加到 `dsh.profile.bundles`。重启 `dsh web`
-并刷新页面后，会话窗口左下角会出现独立的 “OpenCode Go 用量” 悬浮入口。
+安装后 `dsh plugin` 会自动写入该 profile 的 `dependencies`，并把
+`dsh-plugin-opencode-usage` 追加到 `dsh.profile.bundles`。重启 DSH
+（桌面端退出后重新打开）并刷新页面后，会话窗口左下角会出现独立的
+“OpenCode Go 用量” 悬浮入口。
 
 ## 配置
 
@@ -140,29 +150,70 @@ OPENCODE_GO_API_KEY: sk-...
 
 ## 兼容性
 
-插件声明了它需要哪一版 Harness，市场与 `dsh-market` 据此判断能否安装：
+插件在两处声明它需要哪一版 Harness。
+
+**1. 逐版本兼容表** —— 市场 / DSH STORE 读它；逐版本声明是必须的，宽泛范围不被接受：
+
+```jsonc
+"dsh": {
+  "compatibility": {
+    "dshReleases": {
+      "0.1.5-rc.1": "compatible",
+      "0.1.5-rc.2": "compatible",
+      "0.2.0-rc.2": "compatible"        // 当前桌面端
+    },
+    "dsh": ">=0.1.5-rc.1 <0.2.0-0 || >=0.2.0-rc.2 <0.3.0-0"
+  }
+}
+```
+
+**2. 范围声明** —— Harness 启动时的兼容性预检与 `dsh plugin add` 读它，只比对
+`@deepseek-ai/dsh` 与 `@deepseek-ai/dsh-*` 这两类 peer：
 
 ```jsonc
 "engines": {
   "node": "^22.19.0 || >=24.0.0",
-  "dsh": ">=0.1.5-rc.1 <0.2.0-0"        // 支持 DSH 0.1.5 这一条发布线
+  "dsh": ">=0.1.5-rc.1 <0.2.0-0 || >=0.2.0-rc.2 <0.3.0-0"
 },
 "peerDependencies": {
   "@deepseek-ai/cordis": "^4.0.2",
-  "@deepseek-ai/dsh-client-locale":       ">=0.1.5-rc.1 <0.2.0-0",
-  "@deepseek-ai/dsh-client-ui-renderer":  ">=0.1.5-rc.1 <0.2.0-0",
-  "@deepseek-ai/dsh-credentials":         ">=0.1.5-rc.1 <0.2.0-0",
-  "@deepseek-ai/dsh-host-webserver":      ">=0.1.5-rc.1 <0.2.0-0"
+  "@deepseek-ai/dsh-client-locale":       ">=0.1.5-rc.1 <0.2.0-0 || >=0.2.0-rc.2 <0.3.0-0",
+  "@deepseek-ai/dsh-client-ui-renderer":  ">=0.1.5-rc.1 <0.2.0-0 || >=0.2.0-rc.2 <0.3.0-0",
+  "@deepseek-ai/dsh-credentials":         ">=0.1.5-rc.1 <0.2.0-0 || >=0.2.0-rc.2 <0.3.0-0",
+  "@deepseek-ai/dsh-host-webserver":      ">=0.1.5-rc.1 <0.2.0-0 || >=0.2.0-rc.2 <0.3.0-0"
 }
 ```
 
-已验证覆盖 **0.1.5-rc.2**（当前最新）与 **0.1.5-rc.1**。
+| DSH 版本 | 状态 | 说明 |
+| --- | --- | --- |
+| `0.2.0-rc.2` | compatible | 当前桌面端（内置 `@deepseek-ai/dsh-desktop-runtime` 0.2.0-rc.2） |
+| `0.1.5-rc.2` | compatible | 原验证版本 |
+| `0.1.5-rc.1` | compatible | 原验证版本 |
 
-> 关于范围写法：`>=0.0.1-rc <2` 这类「看起来很宽」的范围会**静默排除**所有预发布构建。
-> node-semver 只有当范围内某个比较符与该版本的 `major.minor.patch` 元组完全一致、
-> 且自身带预发布标签时才放行预发布版本，而 `>=0.0.1-rc <2` 在 `0.1.5` 这个元组上没有
-> 这样的比较符。上界写成 `<0.2.0-0` 而不是 `<0.2.0`，同样是为了让 `0.2.0-rc.1`
-> 这类版本被正确拒绝而不是意外放行。
+> 为什么范围要写成两段：node-semver 只在范围内某个比较符与该版本的
+> `major.minor.patch` 元组一致、且自身带预发布标签时，才放行预发布版本。
+> `>=0.1.5-rc.1 <0.3.0-0` 这类「看起来覆盖一切」的写法在 `0.2.0` 元组上没有这样的
+> 比较符，会把 `0.2.0-rc.2` **静默排除**（可自行验证：
+> `semver.satisfies("0.2.0-rc.2", ">=0.1.5-rc.1 <0.3.0-0") === false`）。
+> 所以 0.2.0 这条线必须单独写一段 `>=0.2.0-rc.2 <0.3.0-0`；上界写成 `<0.3.0-0`
+> 而不是 `<0.3.0`，是为了让 `0.3.0-rc.1` 被正确拒绝而不是意外放行。
+
+### 0.2.0-rc.2 核对结果
+
+0.2.0-rc.2 下插件不需要改动任何运行时代码：它用到的每个 seam 在该版本里都保持原样，
+下面按桌面端 `app.asar` 内 0.2.0-rc.2 的实际源码逐条核对（括号内为核实来源）：
+
+| 用到的 seam | 0.2.0-rc.2 |
+| --- | --- |
+| `window.__ModuleLoader__.load({ id, factory })`、`exports.apply/inject` | 不变（`dsh-client-modules`） |
+| `dsh.client.inject` / `platform` | 不变；依赖的两个包仍在随包清单里（两包均为 0.2.0-rc.2） |
+| `shell.overlay` 槽位、`data-shell-overlay` | 不变（`dsh-client-ui-layout`） |
+| AppFrame 子节点顺序（`frame.children[1]` 即会话中心列） | 与 0.1.5 逐节点一致 |
+| `ctx.slots.inject` / `ctx.slots.register` | 不变（`dsh-client-ui-renderer` 仍以 `"slots"` 注册服务） |
+| `ctx.locale.register(ns, { zh, en })` | 不变（`LOCALE_ID_PATTERN` 与 disposer 语义一致） |
+| `webServer.register({ kind: "exact", path, handler })` | 不变（重复 `(kind, path)` 仍抛错） |
+| `ctx.credentials.resolve(ref)` → `{ value, source }` | 不变 |
+| `ctx.get("webServer")` 缺服务时返回 `undefined`；`internal/service` 事件 | 不变（cordis 4.0.2 → 4.0.4） |
 
 未声明任何 Harness 依赖时，市场会显示 **unknown（未声明）** 而不是「兼容」——
 这也是本插件 0.1.0 的状态，0.1.1 起已显式声明。
@@ -171,7 +222,8 @@ OPENCODE_GO_API_KEY: sk-...
 
 - 官方 usage 接口只返回百分比，不返回绝对金额；插件也只展示百分比
 - 不同模型额度金额不同，因此不提供金额换算，避免误导
-- 仅适用于 `web` profile；`headless` 下不注册路由
+- 仅适用于带 Web 服务的 profile（桌面端 `desktop`、命令行 `web`）；`headless` 下
+  不注册路由，面板也不出现
 - `GET /plugins/opencode-usage/stats` **不做鉴权**，它继承 webserver 的绑定地址。
   默认 profile 绑定 `127.0.0.1`，只有本机可访问；若你把 profile 的
   `webServer.config.host` 改成 `0.0.0.0`，同一局域网内的任何人都能读到用量百分比。
